@@ -1,7 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router'
-import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { CssBaseline, ThemeProvider } from '@mui/material'
+import { theme } from './theme'
 import App from './App'
 import ErrorPage from './pages/ErrorPage'
 import HomePage from './pages/HomePage'
@@ -15,7 +16,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
-        path: "",
+        index: true,
         element: <HomePage />,
       },
       {
@@ -29,18 +30,6 @@ const router = createBrowserRouter([
     ],
   },
 ])
-
-const theme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#ff9800',
-    },
-    secondary: {
-      main: '#4caf50',
-    },
-  },
-})
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

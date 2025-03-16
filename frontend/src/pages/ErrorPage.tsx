@@ -1,38 +1,45 @@
-import { Box, Typography, Button } from '@mui/material'
-import { useRouteError, useNavigate } from 'react-router-dom'
+import { useRouteError } from 'react-router-dom'
+import { Typography, Box, Container, Button } from '@mui/material'
+import { Link as RouterLink } from 'react-router-dom'
+
+interface RouterError {
+  statusText?: string
+  message?: string
+}
 
 export default function ErrorPage() {
-  const error = useRouteError() as { statusText?: string; message?: string }
-  const navigate = useNavigate()
+  const error = useRouteError() as RouterError
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        textAlign: 'center',
-      }}
-    >
-      <Typography variant="h1" color="error" gutterBottom>
-        Oops!
-      </Typography>
-      <Typography variant="h4" gutterBottom>
-        Sorry, an unexpected error has occurred.
-      </Typography>
-      <Typography variant="body1" color="text.secondary" gutterBottom>
-        {error.statusText || error.message || 'Unknown error'}
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => navigate('/')}
-        sx={{ mt: 2 }}
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          mt: 8,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
       >
-        Go Home
-      </Button>
-    </Box>
+        <Typography variant="h1" component="h1" gutterBottom>
+          Oops!
+        </Typography>
+        <Typography variant="h5" component="h2" gutterBottom color="text.secondary">
+          Sorry, an unexpected error has occurred.
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+          {error.statusText || error.message || 'Unknown error'}
+        </Typography>
+        <Button
+          component={RouterLink}
+          to="/"
+          variant="contained"
+          color="primary"
+          size="large"
+        >
+          Return to Home
+        </Button>
+      </Box>
+    </Container>
   )
 } 
