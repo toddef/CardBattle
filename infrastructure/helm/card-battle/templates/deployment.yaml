@@ -1,0 +1,72 @@
+{{- range $name, $config := .Values.services }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}
+  labels:
+    app: card-battle
+    component: {{ $name }}
+    release: {{ $.Release.Name }}
+spec:
+  replicas: {{ $.Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: card-battle
+      component: {{ $name }}
+      release: {{ $.Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: card-battle
+        component: {{ $name }}
+        release: {{ $.Release.Name }}
+    spec:
+      containers:
+        - name: {{ $name }}
+          image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
+          imagePullPolicy: {{ $.Values.common.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ $config.port }}
+              protocol: TCP
+          resources:
+            {{- if $config.resources }}
+            {{- toYaml $config.resources | nindent 12 }}
+            {{- else }}
+            {{- toYaml $.Values.common.resources | nindent 12 }}
+            {{- end }}
+---
+{{- end }}
+# Frontend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend
+  labels:
+    app: card-battle
+    component: frontend
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: card-battle
+      component: frontend
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: card-battle
+        component: frontend
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.frontend.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }} 

@@ -1,0 +1,42 @@
+{{- range $name, $config := .Values.services }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}
+  labels:
+    app: card-battle
+    component: {{ $name }}
+    release: {{ $.Release.Name }}
+spec:
+  type: {{ $.Values.service.type }}
+  ports:
+    - port: {{ $config.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: card-battle
+    component: {{ $name }}
+    release: {{ $.Release.Name }}
+---
+{{- end }}
+# Frontend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend
+  labels:
+    app: card-battle
+    component: frontend
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.frontend.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: card-battle
+    component: frontend
+    release: {{ .Release.Name }} 
