@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cardbattle/backend/pkg/server"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"github.com/toddef/cardbattle/backend/pkg/server"
 )
 
 func TestHealthEndpoint(t *testing.T) {

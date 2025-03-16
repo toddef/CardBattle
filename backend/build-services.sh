@@ -1,14 +1,24 @@
 #!/bin/bash
 
-# List of services
-SERVICES=("auth" "card" "deck" "game" "lobby" "replay" "user")
+# List of services with shared module
+SHARED_SERVICES=("card" "deck" "game" "lobby" "replay")
 REGISTRY=${DOCKER_REGISTRY:-"card-battle"}  # Use environment variable or default
 
-# Generate Dockerfiles first
+# Generate Dockerfiles for shared services
 ./generate-dockerfiles.sh
 
-# Build all services
-for service in "${SERVICES[@]}"; do
+# Build user service first (independent module)
+echo "Building user service..."
+docker build -t $REGISTRY/user-service:latest ./user
+
+# If we're in GitHub Actions, push the user service image
+if [ ! -z "$GITHUB_ACTIONS" ]; then
+    echo "Pushing user service to registry..."
+    docker push $REGISTRY/user-service:latest
+fi
+
+# Build all shared services
+for service in "${SHARED_SERVICES[@]}"; do
     echo "Building $service service..."
     
     # Create a temporary build context

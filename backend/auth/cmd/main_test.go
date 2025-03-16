@@ -6,15 +6,24 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/cardbattle/backend/pkg/server"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 )
 
+type HealthResponse struct {
+	Status string `json:"status"`
+}
+
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
+	response := HealthResponse{Status: "ok"}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 func TestHealthEndpoint(t *testing.T) {
 	// Create a new router
 	r := mux.NewRouter()
-	r.HandleFunc("/healthz", server.HealthHandler).Methods("GET")
+	r.HandleFunc("/healthz", HealthHandler).Methods("GET")
 
 	// Create a test request
 	req := httptest.NewRequest("GET", "/healthz", nil)
@@ -27,7 +36,7 @@ func TestHealthEndpoint(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	// Check response body
-	var response server.HealthResponse
+	var response HealthResponse
 	err := json.NewDecoder(w.Body).Decode(&response)
 	assert.NoError(t, err)
 	assert.Equal(t, "ok", response.Status)

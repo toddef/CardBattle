@@ -1,25 +1,26 @@
 # Build stage
 FROM golang:1.24.1-alpine AS builder
 
-WORKDIR /build
+WORKDIR /app
 
 # Install build dependencies
 RUN apk add --no-cache git
 
-# Copy go.mod and go.sum first for better caching
-COPY go.mod go.sum ./
+# Copy backend shared code first
+COPY pkg /app/pkg
+COPY go.mod go.sum /app/
+
+# Copy user service code
+COPY user /app/user/
+
+# Set working directory to user service
+WORKDIR /app/user
 
 # Download dependencies
 RUN go mod download
 
-# Copy the shared packages
-COPY pkg/ ./pkg/
-
-# Copy the service-specific code
-COPY user/ ./user/
-
 # Build the application
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /user-service ./user/cmd/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /user-service ./cmd
 
 # Final stage
 FROM alpine:latest
