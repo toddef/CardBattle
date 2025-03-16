@@ -23,3 +23,11 @@ go.work.sum
 
 # env file
 .env
+
+*/node_modules/*
+*/dist/*
+*/build/*
+*/coverage/*
+*/dist/*
+*/build/*
+*/coverage/*
