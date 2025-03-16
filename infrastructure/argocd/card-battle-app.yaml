@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: card-battle
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/yourusername/CardBattle.git  # Replace with your repo URL
+    targetRevision: HEAD
+    path: infrastructure/helm/card-battle
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: card-battle
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true 

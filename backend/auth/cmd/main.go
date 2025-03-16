@@ -4,25 +4,34 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
-	"github.com/cardbattle/backend/pkg/server"
-	"github.com/gorilla/mux"
-)
-
-const (
-	port = 8080
+	"github.com/toddef/cardbattle/backend/auth/pkg/auth"
 )
 
 func main() {
-	r := mux.NewRouter()
+	// Get environment variables
+	clientID := os.Getenv("GOOGLE_CLIENT_ID")
+	clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
+	redirectURI := os.Getenv("GOOGLE_REDIRECT_URI")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	// Health check endpoint
-	r.HandleFunc("/healthz", server.HealthHandler).Methods("GET")
+	// Initialize Google OAuth client
+	googleClient := auth.NewGoogleOAuthClient(clientID, clientSecret, redirectURI)
+
+	// Create auth service
+	authService := auth.NewAuthService(googleClient)
+
+	// Set up routes
+	http.HandleFunc("/oauth/google", authService.HandleGoogleOAuth)
 
 	// Start server
-	addr := fmt.Sprintf(":%d", port)
-	log.Printf("Starting Auth service on port %d", port)
-	if err := http.ListenAndServe(addr, r); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+	addr := fmt.Sprintf(":%s", port)
+	log.Printf("Starting server on %s", addr)
+	if err := http.ListenAndServe(addr, nil); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/cardbattle/backend/pkg/server"
 	"github.com/gorilla/mux"
+	"github.com/toddef/cardbattle/backend/pkg/server"
 )
 
 const (
