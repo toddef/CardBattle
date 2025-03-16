@@ -2,7 +2,7 @@ replicaCount: 1
 
 # Common settings for all services
 common:
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Never
   resources:
     limits:
       cpu: 200m
@@ -67,6 +67,7 @@ frontend:
   image:
     repository: card-battle/frontend
     tag: "latest"
+    pullPolicy: Never
   port: 80
   resources:
     limits:
@@ -89,6 +90,7 @@ ingress:
   className: "nginx"
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/use-regex: "true"
   hosts:
     - host: card-battle.local
       paths:
@@ -120,7 +122,7 @@ ingress:
           pathType: Prefix
           service: user
           port: 8086
-        - path: /()(.*)
+        - path: /(.*)
           pathType: Prefix
           service: frontend
           port: 80

@@ -1,17 +1,22 @@
 # Build stage
-FROM golang:1.22-alpine AS builder
+FROM golang:1.24.1-alpine AS builder
 
-WORKDIR /app
+WORKDIR /build
 
 # Install build dependencies
 RUN apk add --no-cache git
 
-# Pre-copy/cache go.mod for pre-downloading dependencies
+# Copy go.mod and go.sum first for better caching
 COPY go.mod go.sum ./
+
+# Download dependencies
 RUN go mod download
 
-# Copy the source code
-COPY . .
+# Copy the shared packages
+COPY pkg/ ./pkg/
+
+# Copy the service-specific code
+COPY lobby/ ./lobby/
 
 # Build the application
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /lobby-service ./lobby/cmd/main.go

@@ -1,27 +1,42 @@
 # List of services
-$services = @("auth", "card", "deck", "game", "lobby", "replay", "user")
-$registry = if ($env:DOCKER_REGISTRY) { $env:DOCKER_REGISTRY } else { "card-battle" }
+$services = @{
+    "auth" = 8080
+    "card" = 8081
+    "deck" = 8082
+    "game" = 8083
+    "lobby" = 8084
+    "replay" = 8085
+    "user" = 8086
+}
 
-# Build backend services
-foreach ($service in $services) {
-    Write-Host "Building $service service..."
-    docker build -t "$registry/$service-service:latest" -f "$service/Dockerfile" .
+# Generate Dockerfiles first
+.\generate-dockerfiles.ps1
+
+# Build all services
+foreach ($service in $services.GetEnumerator()) {
+    $serviceName = $service.Key
+    Write-Host "Building $serviceName service..."
+    
+    # Create a temporary build context
+    New-Item -ItemType Directory -Force -Path ".build-context" | Out-Null
+    
+    # Copy necessary files to build context
+    Copy-Item go.mod, go.sum -Destination ".build-context"
+    Copy-Item -Path "pkg" -Destination ".build-context" -Recurse
+    Copy-Item -Path $serviceName -Destination ".build-context" -Recurse
+    Copy-Item "$serviceName/Dockerfile" -Destination ".build-context"
+    
+    # Build from the temporary context
+    docker build -t "card-battle/$serviceName-service:latest" .build-context
+    
+    # Clean up
+    Remove-Item -Path ".build-context" -Recurse -Force
     
     # If we're in GitHub Actions, also push the image
     if ($env:GITHUB_ACTIONS) {
-        Write-Host "Pushing $service service to registry..."
-        docker push "$registry/$service-service:latest"
+        Write-Host "Pushing $serviceName service to registry..."
+        docker push "card-battle/$serviceName-service:latest"
     }
-}
-
-# Build frontend
-Write-Host "Building frontend..."
-docker build -t "$registry/frontend:latest" -f "../frontend/Dockerfile" "../frontend"
-
-# If we're in GitHub Actions, also push the frontend image
-if ($env:GITHUB_ACTIONS) {
-    Write-Host "Pushing frontend to registry..."
-    docker push "$registry/frontend:latest"
 }
 
 Write-Host "All services built successfully!" 

@@ -4,10 +4,27 @@
 SERVICES=("auth" "card" "deck" "game" "lobby" "replay" "user")
 REGISTRY=${DOCKER_REGISTRY:-"card-battle"}  # Use environment variable or default
 
-# Build backend services
+# Generate Dockerfiles first
+./generate-dockerfiles.sh
+
+# Build all services
 for service in "${SERVICES[@]}"; do
     echo "Building $service service..."
-    docker build -t $REGISTRY/$service-service:latest -f $service/Dockerfile .
+    
+    # Create a temporary build context
+    mkdir -p .build-context
+    
+    # Copy necessary files to build context
+    cp go.mod go.sum .build-context/
+    cp -r pkg .build-context/
+    cp -r $service .build-context/
+    cp $service/Dockerfile .build-context/
+    
+    # Build from the temporary context
+    docker build -t $REGISTRY/$service-service:latest .build-context
+    
+    # Clean up
+    rm -rf .build-context
     
     # If we're in GitHub Actions, also push the image
     if [ ! -z "$GITHUB_ACTIONS" ]; then
